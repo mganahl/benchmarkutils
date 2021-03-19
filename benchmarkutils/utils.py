@@ -1,14 +1,3 @@
-import cirq
-import os
-import gc
-import pickle
-import tensornetwork as tn
-from tpu_cirq import tpu_simulator
-import numpy as np
-from qsim_circuits.random_circuits import crng_circuit
-from tpu_cirq.tpu_simulator import TPUSimulator
-from circuits import qaoa
-import time
 
 
 def dict_depth(dictionary, current_depth):
