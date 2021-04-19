@@ -2,7 +2,7 @@
 
 from setuptools import find_packages, setup
 
-description = ('tools for testing and benchmarking')
+description = ('Utilities for benchmarking python code.')
 
 # Read in requirements
 requirements = [
