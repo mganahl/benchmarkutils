@@ -1,4 +1,61 @@
+import time
+import functools as fct
+from typing import Callable, Dict
+CACHED_FUNS = set()
 
+def timing(fun:Callable, logger:Dict):
+  """
+  Decorator function to time `fun`, and store result
+  in `logger`. `logger` is a `dict` type to which the
+  timing results are written. The timings for `fun` are
+  stored in the key `key = fun.__name__`.
+  `logger[key]` is another `dict` type holding
+  timings for calls to `fun`. If any of the
+  outputs of `fun` is a jax type with an attribute
+  `block_until_ready()`, the timing of the the first
+  call to `fun` is stored in `logger[key]['warmup']`.
+  All other timings are are stored in a list in
+  `logger[key]['timings']`.
+
+  Args:
+    fun: Function to be timed.
+    logger: A dictionary to store timings.
+
+  Returns:
+    Wrapped `fun`.
+  """
+  key = fun.__name__
+  @fct.wraps(fun)
+  def wrapped(*args, **kwargs):
+    global CACHED_FUNS
+    warmup = fun not in CACHED_FUNS
+    needs_blocking = False
+    if fun not in CACHED_FUNS:
+      CACHED_FUNS |= {fun,}
+    t1 = time.time()
+    out = fun(*args, **kwargs)
+    t2 = time.time()
+    if isinstance(out, tuple):
+      for o in out:
+        if hasattr(o, 'block_until_ready'):
+          o.block_until_ready()
+          needs_blocking = True
+          break
+    else:
+      if hasattr(out, 'block_until_ready'):
+        out.block_until_ready()
+        needs_blocking = True
+    t3 = time.time()
+    dt = time.time() - t1 - t3 + t2
+    if key not in logger:
+      logger[key] = dict()
+    if warmup and needs_blocking:
+      logger[key]['warmup'] = dt
+    else:
+      if 'timings' not in logger[key]:
+        logger[key]['timings'] = []
+      logger[key]['timings'].append(dt)
+  return wrapped
 
 def dict_depth(dictionary, current_depth):
   """
@@ -15,7 +72,7 @@ def insert(keys, value, dictionary):
   """
   Insert 'value' into a nested dict 'dictionary',
   using elements of `keys` on the different nesting
-  level.s
+  levels
   """
   assert (dict_depth(dictionary, 0)
           == len(keys)) or (len(dictionary)
@@ -33,7 +90,7 @@ def insert(keys, value, dictionary):
   return dictionary
 
 
-def record_timing(keys, values, iteration, walltime, dictionary):
+def record_value(keys, values, iteration, value, dictionary):
   """
   Record `values` into `dictionary`.
   """
@@ -42,4 +99,4 @@ def record_timing(keys, values, iteration, walltime, dictionary):
   else:
     last_key = ['subsequent']
   dict_keys = [f'{k}={v}' for k, v in zip(keys, values)] + last_key
-  return insert(dict_keys, walltime, dictionary)
+  return insert(dict_keys, value, dictionary)
