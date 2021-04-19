@@ -1,0 +1,7 @@
+numpy
+matplotlib
+pytest
+yapf>=0.31.0
+jupyter
+
+
