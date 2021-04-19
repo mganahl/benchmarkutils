@@ -55,6 +55,7 @@ def timing(fun:Callable, logger:Dict):
       if 'timings' not in logger[key]:
         logger[key]['timings'] = []
       logger[key]['timings'].append(dt)
+    return out
   return wrapped
 
 def dict_depth(dictionary, current_depth):
