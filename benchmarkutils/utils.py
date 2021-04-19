@@ -3,7 +3,7 @@ import functools as fct
 from typing import Callable, Dict
 CACHED_FUNS = set()
 
-def timing(fun:Callable, logger:Dict):
+def log_timing(fun:Callable, logger:Dict):
   """
   Decorator function to time `fun`, and store result
   in `logger`. `logger` is a `dict` type to which the
