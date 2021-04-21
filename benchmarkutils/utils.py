@@ -3,7 +3,7 @@ import functools as fct
 from typing import Callable, Dict
 CACHED_FUNS = set()
 
-def log_timing(fun:Callable, logger:Dict):
+def log_timing(fun:Callable, logger:Dict, key=None):
   """
   Decorator function to time `fun`, and store result
   in `logger`. `logger` is a `dict` type to which the
@@ -24,7 +24,8 @@ def log_timing(fun:Callable, logger:Dict):
   Returns:
     Wrapped `fun`.
   """
-  key = fun.__name__
+  if key is None:
+    key = fun.__name__
   @fct.wraps(fun)
   def wrapped(*args, **kwargs):
     global CACHED_FUNS
