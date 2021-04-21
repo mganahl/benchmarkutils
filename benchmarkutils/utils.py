@@ -76,9 +76,6 @@ def insert(keys, value, dictionary):
   using elements of `keys` on the different nesting
   levels
   """
-  assert (dict_depth(dictionary, 0)
-          == len(keys)) or (len(dictionary)
-                            == 0), 'dict depth does not match key length'
   if len(keys) > 1:
     if keys[0] not in dictionary:
       dictionary[keys[0]] = {}
