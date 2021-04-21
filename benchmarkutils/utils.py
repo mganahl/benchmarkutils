@@ -51,7 +51,7 @@ def log_timing(fun:Callable, logger:Dict, key=None):
     if key not in logger:
       logger[key] = dict()
     if warmup and needs_blocking:
-      logger[key]['warmup'] = dt
+      logger[key]['warmup'] = [dt]
     else:
       if 'timings' not in logger[key]:
         logger[key]['timings'] = []
@@ -91,6 +91,28 @@ def insert(keys, value, dictionary):
   dictionary[keys[0]].append(value)
   return dictionary
 
+
+
+def _flatten_helper(dictionary):
+  if isinstance(dictionary, dict):
+    keylist = []
+    valuelist = []
+    for key, value in dictionary.items():
+      kls, vls = _flatten_helper(value)
+      valuelist.extend(vls)
+      for k in kls:
+        keylist.append([key] + k)
+
+    return keylist, valuelist
+  return [[]], [dictionary]
+
+def flatten_dictionary(dictionary):
+  ks, vs = _flatten_helper(dictionary)
+  keys, values = [], []
+  for k, v in zip(ks, vs):
+    keys.extend([k] *len(v))
+    values.extend(v)
+  return keys, values
 
 def record_value(keys, values, iteration, value, dictionary):
   """
