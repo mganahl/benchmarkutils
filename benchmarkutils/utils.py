@@ -35,19 +35,17 @@ def log_timing(fun:Callable, logger:Dict, key=None):
       CACHED_FUNS |= {fun,}
     t1 = time.time()
     out = fun(*args, **kwargs)
-    t2 = time.time()
     if isinstance(out, tuple):
       for o in out:
         if hasattr(o, 'block_until_ready'):
           o.block_until_ready()
           needs_blocking = True
-          break
+
     else:
       if hasattr(out, 'block_until_ready'):
         out.block_until_ready()
         needs_blocking = True
-    t3 = time.time()
-    dt = time.time() - t1 - t3 + t2
+    dt = time.time() - t1
     if key not in logger:
       logger[key] = dict()
     if warmup and needs_blocking:
